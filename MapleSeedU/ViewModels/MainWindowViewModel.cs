@@ -17,6 +17,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using MapleSeedU.Models;
 using MapleSeedU.Models.Settings;
+using System.ComponentModel;
+using XInputDotNetPure;
 
 #endregion
 
@@ -43,6 +45,7 @@ namespace MapleSeedU.ViewModels
 
             UpdateDatabase();
         }
+
 
         private void Reset()
         {

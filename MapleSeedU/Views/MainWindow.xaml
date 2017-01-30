@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
     xmlns:ViewModels="clr-namespace:MapleSeedU.ViewModels" x:Class="MapleSeedU.Views.MainWindow"
-    mc:Ignorable="d" Width="823" Height="552" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Icon="/MapleSeedU;component/Seed.ico" Title="Maple Seed Lite" IsMaxRestoreButtonEnabled="False" SaveWindowPosition="True" ShowMaxRestoreButton="False" BorderBrush="Black">
+    mc:Ignorable="d" Width="823" Height="552" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Icon="/MapleSeedU;component/Seed.ico" Title="Maple Seed Lite" IsMaxRestoreButtonEnabled="False" SaveWindowPosition="True" ShowMaxRestoreButton="False" BorderBrush="Black" Loaded="Window_Loaded">
 
     <Controls:MetroWindow.DataContext>
         <ViewModels:MainWindowViewModel/>
@@ -32,7 +32,7 @@
         
         <ProgressBar Maximum="{Binding ProgressBarMax, UpdateSourceTrigger=PropertyChanged}" Value="{Binding ProgressBarCurrent, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,30" Height="28" VerticalAlignment="Bottom" Background="{x:Null}" BorderBrush="{x:Null}"/>
         <Label Content="{Binding Status, UpdateSourceTrigger=PropertyChanged}" Foreground="Gray" HorizontalAlignment="Left" Margin="0,0,0,4" VerticalAlignment="Bottom"/>
-        <ComboBox ItemsSource="{Binding TitleInfoEntries, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding TitleInfoEntry}" SelectedIndex="0" HorizontalAlignment="Left" Margin="10,0,0,63" VerticalAlignment="Bottom" IsEditable="True" Width="300" Foreground="#FFAAAAAA" FontWeight="Bold">
+        <ComboBox x:Name="cmbGames" ItemsSource="{Binding TitleInfoEntries, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding TitleInfoEntry}" SelectedIndex="0" HorizontalAlignment="Left" Margin="10,0,0,63" VerticalAlignment="Bottom" IsEditable="True" Width="300" Foreground="#FFAAAAAA" FontWeight="Bold">
             <ComboBox.Background>
                 <SolidColorBrush Color="#B2000000"/>
             </ComboBox.Background>
