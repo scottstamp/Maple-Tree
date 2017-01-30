@@ -25,6 +25,8 @@ namespace MapleSeedU.Views
 
         private DateTime lastInput = DateTime.Now; // DateTime var storing last input time (debouncing)
 
+        private enum dpadButton { Up, Down, Left, Right };
+
         private enum faceButton { A, B, X, Y, Guide, Start, Back, LeftStick, RightStick, LeftShoulder, RightShoulder };
 
         private faceButton launchButton = faceButton.A;
@@ -53,30 +55,21 @@ namespace MapleSeedU.Views
 
             if ((DateTime.Now - lastInput).Milliseconds > 250)
             {
-                if (state.DPad.Up == ButtonState.Pressed) // D-Pad Up
-                {
-                    if (cmbGames.SelectedIndex > 0)
-                        cmbGames.SelectedIndex--;
-
-                    lastInput = DateTime.Now;
-                }
-
-                if (state.DPad.Down == ButtonState.Pressed) // D-Pad Down
-                {
-                    if (cmbGames.SelectedIndex < cmbGames.Items.Count)
-                        cmbGames.SelectedIndex++;
-
-                    lastInput = DateTime.Now;
-                }
+                if (state.DPad.Up == ButtonState.Pressed) DPadButtonPress(dpadButton.Up);
+                if (state.DPad.Down == ButtonState.Pressed) DPadButtonPress(dpadButton.Down);
+                if (state.DPad.Left == ButtonState.Pressed) DPadButtonPress(dpadButton.Left);
+                if (state.DPad.Right == ButtonState.Pressed) DPadButtonPress(dpadButton.Right);
 
                 if (state.Buttons.A == ButtonState.Pressed) FaceButtonPress(faceButton.A);
                 if (state.Buttons.B == ButtonState.Pressed) FaceButtonPress(faceButton.B);
                 if (state.Buttons.X == ButtonState.Pressed) FaceButtonPress(faceButton.X);
                 if (state.Buttons.Y == ButtonState.Pressed) FaceButtonPress(faceButton.Y);
+
                 // use this to exit Cemu, it's the "Xbox" button on a XBone controller
                 if (state.Buttons.Guide == ButtonState.Pressed) FaceButtonPress(faceButton.Guide);
                 if (state.Buttons.Start == ButtonState.Pressed) FaceButtonPress(faceButton.Start);
                 if (state.Buttons.Back == ButtonState.Pressed) FaceButtonPress(faceButton.Back);
+
                 if (state.Buttons.LeftStick == ButtonState.Pressed) FaceButtonPress(faceButton.LeftStick);
                 if (state.Buttons.RightStick == ButtonState.Pressed) FaceButtonPress(faceButton.RightStick);
                 if (state.Buttons.LeftShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.LeftShoulder);
@@ -84,9 +77,22 @@ namespace MapleSeedU.Views
             }
         }
 
+        private void DPadButtonPress(dpadButton button)
+        {
+            if (button == dpadButton.Down)
+                if (cmbGames.SelectedIndex < cmbGames.Items.Count)
+                    cmbGames.SelectedIndex++;
+            if (button == dpadButton.Up)
+                if (cmbGames.SelectedIndex > 0)
+                    cmbGames.SelectedIndex--;
+
+            lastInput = DateTime.Now;
+        }
+
         private void FaceButtonPress(faceButton button)
         {
             var viewModel = (MainWindowViewModel)DataContext;
+
             if (button == launchButton)
             {
                 if (viewModel.PlayTitleCommand.CanExecute(null))
