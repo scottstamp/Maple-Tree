@@ -6,6 +6,8 @@
 using MapleSeedU.ViewModels;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Controls;
 using XInputDotNetPure;
 
@@ -22,7 +24,7 @@ namespace MapleSeedU.Views
 
         private DateTime lastInput = DateTime.Now; // DateTime var storing last input time (debouncing)
 
-        private enum faceButton { A, B, X, Y };
+        private enum faceButton { A, B, X, Y, Guide, Start, Back, LeftStick, RightStick, LeftShoulder, RightShoulder };
 
         private faceButton launchButton = faceButton.A;
 
@@ -68,22 +70,43 @@ namespace MapleSeedU.Views
                 if (state.Buttons.B == ButtonState.Pressed) FaceButtonPress(faceButton.B);
                 if (state.Buttons.X == ButtonState.Pressed) FaceButtonPress(faceButton.X);
                 if (state.Buttons.Y == ButtonState.Pressed) FaceButtonPress(faceButton.Y);
+                // use this to exit Cemu, it's the "Xbox" button on a XBone controller
+                if (state.Buttons.Guide == ButtonState.Pressed) FaceButtonPress(faceButton.Guide);
+                if (state.Buttons.Start == ButtonState.Pressed) FaceButtonPress(faceButton.Start);
+                if (state.Buttons.Back == ButtonState.Pressed) FaceButtonPress(faceButton.Back);
+                if (state.Buttons.LeftStick == ButtonState.Pressed) FaceButtonPress(faceButton.LeftStick);
+                if (state.Buttons.RightStick == ButtonState.Pressed) FaceButtonPress(faceButton.RightStick);
+                if (state.Buttons.LeftShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.LeftShoulder);
+                if (state.Buttons.RightShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.RightShoulder);
             }
         }
 
         private void FaceButtonPress(faceButton button)
         {
+            var viewModel = (MainWindowViewModel)DataContext;
             if (button == launchButton)
             {
-                var viewModel = (MainWindowViewModel)DataContext;
                 if (viewModel.PlayTitleCommand.CanExecute(null))
                     viewModel.PlayTitleCommand.Execute(null);
             }
+
+            if (button == faceButton.Guide)
+            {
+                var fileName = Path.GetFileName(viewModel.CemuPath.GetPath()).Replace(".exe", "");
+                foreach (Process cemuProcess in Process.GetProcessesByName(fileName)) cemuProcess.Kill();
+            }
+
+            lastInput = DateTime.Now;
         }
 
         private void Window_Loaded(object sender, System.Windows.RoutedEventArgs e)
         {
             pollingWorker.RunWorkerAsync();
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            pollingWorker.CancelAsync();
         }
     }
 }
