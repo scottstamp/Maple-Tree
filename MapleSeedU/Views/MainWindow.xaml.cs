@@ -8,6 +8,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Windows.Controls;
 using XInputDotNetPure;
 
@@ -28,6 +29,8 @@ namespace MapleSeedU.Views
 
         private faceButton launchButton = faceButton.A;
 
+        private bool isClosing;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -38,9 +41,9 @@ namespace MapleSeedU.Views
 
         private void pollingWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            while (!e.Cancel)
+            while (!e.Cancel && !isClosing)
             {
-                if (reporterState.Poll()) Dispatcher.Invoke(new Action(UpdateState));
+                if (reporterState.Poll()) { Dispatcher.Invoke(new Action(UpdateState)); }
             }
         }
 
@@ -106,6 +109,7 @@ namespace MapleSeedU.Views
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            isClosing = true;
             pollingWorker.CancelAsync();
         }
     }
