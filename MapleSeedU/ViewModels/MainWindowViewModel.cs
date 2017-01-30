@@ -1,7 +1,8 @@
 ﻿// Project: MapleSeedU
 // File: Presenter.cs
 // Updated By: Jared
-// 
+// Updated By: Scott Stamp <scott@hypermine.com>
+// Updated On: 01/30/2017
 
 #region usings
 
@@ -17,6 +18,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using MapleSeedU.Models;
 using MapleSeedU.Models.Settings;
+using System.ComponentModel;
+using XInputDotNetPure;
+using System.Diagnostics;
 
 #endregion
 
@@ -32,6 +36,20 @@ namespace MapleSeedU.ViewModels
 
         private TitleInfoEntry _titleInfoEntry;
 
+        private ReporterState reporterState = new ReporterState(); // Game Controller reporter
+
+        private static BackgroundWorker pollingWorker = new BackgroundWorker(); // Polling worker for game controller
+
+        private DateTime lastInput = DateTime.Now; // DateTime var storing last input time (debouncing)
+
+        private enum dpadButton { Up, Down, Left, Right };
+
+        private enum faceButton { A, B, X, Y, Guide, Start, Back, LeftStick, RightStick, LeftShoulder, RightShoulder };
+
+        private faceButton launchButton = faceButton.A;
+
+        private bool isClosing;
+
         public MainWindowViewModel()
         {
             var dispatcherTimer = new DispatcherTimer(TimeSpan.Zero,
@@ -41,7 +59,85 @@ namespace MapleSeedU.ViewModels
             if (Instance == null)
                 Instance = this;
 
+            pollingWorker.WorkerSupportsCancellation = true;
+            pollingWorker.DoWork += new DoWorkEventHandler(pollingWorker_DoWork);
+
             UpdateDatabase();
+        }
+
+        public void OnWindowClosing(object sender, CancelEventArgs e)
+        {
+            isClosing = true;
+            pollingWorker.CancelAsync();
+        }
+
+        private void pollingWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (!e.Cancel && !isClosing)
+            {
+                if (reporterState.Poll()) { Application.Current.Dispatcher.Invoke(new Action(UpdateState)); }
+            }
+        }
+
+        private void UpdateState()
+        {
+            var state = reporterState.LastActiveState;
+
+            // 250ms debouncing for controller inputs
+            if ((DateTime.Now - lastInput).Milliseconds > 250)
+            {
+                if (state.DPad.Up == ButtonState.Pressed) DPadButtonPress(dpadButton.Up);
+                if (state.DPad.Down == ButtonState.Pressed) DPadButtonPress(dpadButton.Down);
+                if (state.DPad.Left == ButtonState.Pressed) DPadButtonPress(dpadButton.Left);
+                if (state.DPad.Right == ButtonState.Pressed) DPadButtonPress(dpadButton.Right);
+
+                if (state.Buttons.A == ButtonState.Pressed) FaceButtonPress(faceButton.A);
+                if (state.Buttons.B == ButtonState.Pressed) FaceButtonPress(faceButton.B);
+                if (state.Buttons.X == ButtonState.Pressed) FaceButtonPress(faceButton.X);
+                if (state.Buttons.Y == ButtonState.Pressed) FaceButtonPress(faceButton.Y);
+
+                // use this to exit Cemu, it's the "Xbox" button on a XBone controller
+                if (state.Buttons.Guide == ButtonState.Pressed) FaceButtonPress(faceButton.Guide);
+                if (state.Buttons.Start == ButtonState.Pressed) FaceButtonPress(faceButton.Start);
+                if (state.Buttons.Back == ButtonState.Pressed) FaceButtonPress(faceButton.Back);
+
+                if (state.Buttons.LeftStick == ButtonState.Pressed) FaceButtonPress(faceButton.LeftStick);
+                if (state.Buttons.RightStick == ButtonState.Pressed) FaceButtonPress(faceButton.RightStick);
+                if (state.Buttons.LeftShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.LeftShoulder);
+                if (state.Buttons.RightShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.RightShoulder);
+            }
+        }
+
+        private void DPadButtonPress(dpadButton button)
+        {
+            var idx = TitleInfoEntries.IndexOf(TitleInfoEntry);
+
+            if (button == dpadButton.Down)
+                if (idx < TitleInfoEntries.Count - 1)
+                    TitleInfoEntry = TitleInfoEntries[idx + 1];
+            if (button == dpadButton.Up)
+                if (idx > 0)
+                    TitleInfoEntry = TitleInfoEntries[idx - 1];
+
+            RaisePropertyChangedEvent("TitleInfoEntry");
+
+            lastInput = DateTime.Now;
+        }
+
+        private void FaceButtonPress(faceButton button)
+        {
+            if (button == launchButton)
+            {
+                PlayTitle();
+            }
+
+            if (button == faceButton.Guide)
+            {
+                var fileName = Path.GetFileName(CemuPath.GetPath()).Replace(".exe", "");
+                foreach (Process cemuProcess in Process.GetProcessesByName(fileName)) cemuProcess.Kill();
+            }
+
+            lastInput = DateTime.Now;
         }
 
         private void Reset()
@@ -123,7 +219,9 @@ namespace MapleSeedU.ViewModels
         private static async void OnLoadComplete(object sender, EventArgs e)
         {
             (sender as DispatcherTimer)?.Stop();
-            
+
+            pollingWorker.RunWorkerAsync();
+
             await Instance.ThemeUpdate();
         }
 

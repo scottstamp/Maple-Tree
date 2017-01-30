@@ -1,9 +1,9 @@
 ﻿// Project: MapleSeedU
 // File: MainWindow.xaml.cs
-// Updated By: Jared
-// 
+// Updated By: Scott Stamp <scott@hypermine.com>
+// Updated On: 01/30/2017
 
-using System.Windows.Controls;
+using MapleSeedU.ViewModels;
 
 namespace MapleSeedU.Views
 {
@@ -15,6 +15,8 @@ namespace MapleSeedU.Views
         public MainWindow()
         {
             InitializeComponent();
+            var viewModel = (MainWindowViewModel)DataContext;
+            Closing += viewModel.OnWindowClosing;
         }
     }
 }

@@ -88,6 +88,10 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="XInputDotNetPure, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Downloads\XInputDotNet-x64-v2015.03-1\XInputDotNetPure.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -111,6 +115,7 @@
     <Compile Include="Models\ThemeManagerHelper.cs" />
     <Compile Include="Models\TitleInfoEntry.cs" />
     <Compile Include="Models\WiiUTitle.cs" />
+    <Compile Include="ReporterState.cs" />
     <Compile Include="ThirdParty\Newtonsoft.Json\Bson\BsonBinaryType.cs" />
     <Compile Include="ThirdParty\Newtonsoft.Json\Bson\BsonBinaryWriter.cs" />
     <Compile Include="ThirdParty\Newtonsoft.Json\Bson\BsonObjectId.cs" />
@@ -378,6 +383,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="XInputDotNetPure.dll" />
+    <Content Include="XInputInterface.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\packages\Fody.1.28.3\build\Fody.targets')" />
