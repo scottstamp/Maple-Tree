@@ -2,10 +2,6 @@
 
 A small application with a feature set aimed to make Wii U title management easier.
 
-***Maple Seed Lite***
-
-![Screenshot](https://pixxy.in/ISL2199.gif)
-
 
 ***Maple Seed***
 
