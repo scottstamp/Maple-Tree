@@ -11,7 +11,7 @@ using Microsoft.Win32;
 
 #endregion
 
-namespace MapleSeedU.Models
+namespace MapleSeedL.Models
 {
     public class RegistryKeyEntry
     {

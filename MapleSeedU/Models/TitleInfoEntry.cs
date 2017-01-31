@@ -16,13 +16,13 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using System.Xml;
-using MapleSeedU.ViewModels;
+using MapleSeedL.ViewModels;
 using Newtonsoft.Json;
 using TgaLib;
 
 #endregion
 
-namespace MapleSeedU.Models
+namespace MapleSeedL.Models
 {
     [Serializable]
     public class TitleInfoEntry

@@ -1,7 +1,7 @@
-﻿<Application x:Class="MapleSeedU.App"
+﻿<Application x:Class="MapleSeedL.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:MapleSeedU"
+             xmlns:local="clr-namespace:MapleSeedL"
              StartupUri="Views/MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>

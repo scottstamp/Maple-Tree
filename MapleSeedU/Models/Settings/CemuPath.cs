@@ -6,7 +6,7 @@
 using System.IO;
 using System.Windows.Forms;
 
-namespace MapleSeedU.Models.Settings
+namespace MapleSeedL.Models.Settings
 {
     public class CemuPath
     {

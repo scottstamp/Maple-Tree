@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Media.Imaging;
 using Point = System.Drawing.Point;
 
-namespace MapleSeedU.Models
+namespace MapleSeedL.Models
 {
     public static class ImageAnalysis
     {

@@ -12,7 +12,7 @@ using System.Linq;
 
 #endregion
 
-namespace MapleSeedU
+namespace MapleSeedL
 {
     public static class Helper
     {

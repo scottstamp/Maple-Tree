@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 #endregion
 
-namespace MapleSeedU.Models.Settings
+namespace MapleSeedL.Models.Settings
 {
     public class LibraryPath
     {

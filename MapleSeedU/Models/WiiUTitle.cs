@@ -1,4 +1,4 @@
-﻿namespace MapleSeedU.Models
+﻿namespace MapleSeedL.Models
 {
     public struct WiiUTitle
     {

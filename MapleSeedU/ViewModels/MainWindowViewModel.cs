@@ -8,147 +8,67 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using MapleSeedU.Models;
-using MapleSeedU.Models.Settings;
-using System.ComponentModel;
+using MapleSeedL.Models;
+using MapleSeedL.Models.Settings;
+using MapleSeedL.Models.XInput;
 using XInputDotNetPure;
-using System.Diagnostics;
 
 #endregion
 
-namespace MapleSeedU.ViewModels
+namespace MapleSeedL.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
         public static MainWindowViewModel Instance;
 
+        // Polling worker for game controller
+        private static readonly BackgroundWorker PollingWorker = new BackgroundWorker();
+
+        // Game Controller reporter
+        private readonly ReporterState _reporterState = new ReporterState();
+
+        // DateTime var storing last input time (debouncing)
+        private DateTime _lastInput = DateTime.Now;
+
         public readonly string DbFile = Path.Combine(Path.GetTempPath(), "MapleTree.json");
+
+        private readonly FaceButton launchButton = FaceButton.A;
+
+        private bool _isClosing;
 
         private string _status = "Github.com/Tsume/Maple-Tree";
 
         private TitleInfoEntry _titleInfoEntry;
 
-        private ReporterState reporterState = new ReporterState(); // Game Controller reporter
-
-        private static BackgroundWorker pollingWorker = new BackgroundWorker(); // Polling worker for game controller
-
-        private DateTime lastInput = DateTime.Now; // DateTime var storing last input time (debouncing)
-
-        private enum dpadButton { Up, Down, Left, Right };
-
-        private enum faceButton { A, B, X, Y, Guide, Start, Back, LeftStick, RightStick, LeftShoulder, RightShoulder };
-
-        private faceButton launchButton = faceButton.A;
-
-        private bool isClosing;
-
         public MainWindowViewModel()
         {
-            var dispatcherTimer = new DispatcherTimer(TimeSpan.Zero,
+            new DispatcherTimer(TimeSpan.Zero,
                 DispatcherPriority.ApplicationIdle, OnLoadComplete,
                 Application.Current.Dispatcher);
 
             if (Instance == null)
                 Instance = this;
 
-            pollingWorker.WorkerSupportsCancellation = true;
-            pollingWorker.DoWork += new DoWorkEventHandler(pollingWorker_DoWork);
+            PollingWorker.WorkerSupportsCancellation = true;
+            PollingWorker.DoWork += pollingWorker_DoWork;
 
             UpdateDatabase();
         }
 
-        public void OnWindowClosing(object sender, CancelEventArgs e)
+        public string Status
         {
-            isClosing = true;
-            pollingWorker.CancelAsync();
-        }
-
-        private void pollingWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            while (!e.Cancel && !isClosing)
-            {
-                if (reporterState.Poll()) { Application.Current.Dispatcher.Invoke(new Action(UpdateState)); }
-            }
-        }
-
-        private void UpdateState()
-        {
-            var state = reporterState.LastActiveState;
-
-            // 250ms debouncing for controller inputs
-            if ((DateTime.Now - lastInput).Milliseconds > 250)
-            {
-                if (state.DPad.Up == ButtonState.Pressed) DPadButtonPress(dpadButton.Up);
-                if (state.DPad.Down == ButtonState.Pressed) DPadButtonPress(dpadButton.Down);
-                if (state.DPad.Left == ButtonState.Pressed) DPadButtonPress(dpadButton.Left);
-                if (state.DPad.Right == ButtonState.Pressed) DPadButtonPress(dpadButton.Right);
-
-                if (state.Buttons.A == ButtonState.Pressed) FaceButtonPress(faceButton.A);
-                if (state.Buttons.B == ButtonState.Pressed) FaceButtonPress(faceButton.B);
-                if (state.Buttons.X == ButtonState.Pressed) FaceButtonPress(faceButton.X);
-                if (state.Buttons.Y == ButtonState.Pressed) FaceButtonPress(faceButton.Y);
-
-                // use this to exit Cemu, it's the "Xbox" button on a XBone controller
-                if (state.Buttons.Guide == ButtonState.Pressed) FaceButtonPress(faceButton.Guide);
-                if (state.Buttons.Start == ButtonState.Pressed) FaceButtonPress(faceButton.Start);
-                if (state.Buttons.Back == ButtonState.Pressed) FaceButtonPress(faceButton.Back);
-
-                if (state.Buttons.LeftStick == ButtonState.Pressed) FaceButtonPress(faceButton.LeftStick);
-                if (state.Buttons.RightStick == ButtonState.Pressed) FaceButtonPress(faceButton.RightStick);
-                if (state.Buttons.LeftShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.LeftShoulder);
-                if (state.Buttons.RightShoulder == ButtonState.Pressed) FaceButtonPress(faceButton.RightShoulder);
-            }
-        }
-
-        private void DPadButtonPress(dpadButton button)
-        {
-            var idx = TitleInfoEntries.IndexOf(TitleInfoEntry);
-
-            if (button == dpadButton.Down)
-                if (idx < TitleInfoEntries.Count - 1)
-                    TitleInfoEntry = TitleInfoEntries[idx + 1];
-            if (button == dpadButton.Up)
-                if (idx > 0)
-                    TitleInfoEntry = TitleInfoEntries[idx - 1];
-
-            RaisePropertyChangedEvent("TitleInfoEntry");
-
-            lastInput = DateTime.Now;
-        }
-
-        private void FaceButtonPress(faceButton button)
-        {
-            if (button == launchButton)
-            {
-                PlayTitle();
-            }
-
-            if (button == faceButton.Guide)
-            {
-                var fileName = Path.GetFileName(CemuPath.GetPath()).Replace(".exe", "");
-                foreach (Process cemuProcess in Process.GetProcessesByName(fileName)) cemuProcess.Kill();
-            }
-
-            lastInput = DateTime.Now;
-        }
-
-        private void Reset()
-        {
-            CemuPath.ResetPath();
-            LibraryPath.ResetPath();
-        }
-
-        public string Status {
             get { return _status; }
-            set {
+            set
+            {
                 _status = value;
                 RaisePropertyChangedEvent("Status");
             }
@@ -162,9 +82,11 @@ namespace MapleSeedU.ViewModels
 
         public List<TitleInfoEntry> TitleInfoEntries => TitleInfoEntry.Entries;
 
-        public TitleInfoEntry TitleInfoEntry {
+        public TitleInfoEntry TitleInfoEntry
+        {
             get { return _titleInfoEntry; }
-            set {
+            set
+            {
                 if (_titleInfoEntry == value) return;
                 _titleInfoEntry = value;
                 value?.UpdateTheme();
@@ -185,9 +107,11 @@ namespace MapleSeedU.ViewModels
 
         private int _progressBarMax { get; set; } = 100;
 
-        public int ProgressBarMax {
+        public int ProgressBarMax
+        {
             get { return _progressBarMax; }
-            set {
+            set
+            {
                 _progressBarMax = value;
                 RaisePropertyChangedEvent("ProgressBarMax");
             }
@@ -195,12 +119,91 @@ namespace MapleSeedU.ViewModels
 
         private int _progressBarCurrent { get; set; } = 100;
 
-        public int ProgressBarCurrent {
+        public int ProgressBarCurrent
+        {
             get { return _progressBarCurrent; }
-            set {
+            set
+            {
                 _progressBarCurrent = value;
                 RaisePropertyChangedEvent("ProgressBarCurrent");
             }
+        }
+
+        public void OnWindowClosing(object sender, CancelEventArgs e)
+        {
+            _isClosing = true;
+            PollingWorker.CancelAsync();
+        }
+
+        private void pollingWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            while (!e.Cancel && !_isClosing)
+                if (_reporterState.Poll()) Application.Current.Dispatcher.Invoke(UpdateState);
+        }
+
+        private void UpdateState()
+        {
+            var state = _reporterState.LastActiveState;
+
+            // 250ms debouncing for controller inputs
+            if ((DateTime.Now - _lastInput).Milliseconds > 250)
+            {
+                if (state.DPad.Up == ButtonState.Pressed) DPadButtonPress(DpadButton.Up);
+                if (state.DPad.Down == ButtonState.Pressed) DPadButtonPress(DpadButton.Down);
+                if (state.DPad.Left == ButtonState.Pressed) DPadButtonPress(DpadButton.Left);
+                if (state.DPad.Right == ButtonState.Pressed) DPadButtonPress(DpadButton.Right);
+
+                if (state.Buttons.A == ButtonState.Pressed) FaceButtonPress(FaceButton.A);
+                if (state.Buttons.B == ButtonState.Pressed) FaceButtonPress(FaceButton.B);
+                if (state.Buttons.X == ButtonState.Pressed) FaceButtonPress(FaceButton.X);
+                if (state.Buttons.Y == ButtonState.Pressed) FaceButtonPress(FaceButton.Y);
+
+                // use this to exit Cemu, it's the "Xbox" button on a XBone controller
+                if (state.Buttons.Guide == ButtonState.Pressed) FaceButtonPress(FaceButton.Guide);
+                if (state.Buttons.Start == ButtonState.Pressed) FaceButtonPress(FaceButton.Start);
+                if (state.Buttons.Back == ButtonState.Pressed) FaceButtonPress(FaceButton.Back);
+
+                if (state.Buttons.LeftStick == ButtonState.Pressed) FaceButtonPress(FaceButton.LeftStick);
+                if (state.Buttons.RightStick == ButtonState.Pressed) FaceButtonPress(FaceButton.RightStick);
+                if (state.Buttons.LeftShoulder == ButtonState.Pressed) FaceButtonPress(FaceButton.LeftShoulder);
+                if (state.Buttons.RightShoulder == ButtonState.Pressed) FaceButtonPress(FaceButton.RightShoulder);
+            }
+        }
+
+        private void DPadButtonPress(DpadButton button)
+        {
+            var idx = TitleInfoEntries.IndexOf(TitleInfoEntry);
+
+            if (button == DpadButton.Down)
+                if (idx < TitleInfoEntries.Count - 1)
+                    TitleInfoEntry = TitleInfoEntries[idx + 1];
+            if (button == DpadButton.Up)
+                if (idx > 0)
+                    TitleInfoEntry = TitleInfoEntries[idx - 1];
+
+            RaisePropertyChangedEvent("TitleInfoEntry");
+
+            _lastInput = DateTime.Now;
+        }
+
+        private void FaceButtonPress(FaceButton button)
+        {
+            if (button == launchButton)
+                PlayTitle();
+
+            if (button == FaceButton.Guide)
+            {
+                var fileName = Path.GetFileName(CemuPath.GetPath())?.Replace(".exe", "");
+                foreach (var cemuProcess in Process.GetProcessesByName(fileName)) cemuProcess.Kill();
+            }
+
+            _lastInput = DateTime.Now;
+        }
+
+        private void Reset()
+        {
+            CemuPath.ResetPath();
+            LibraryPath.ResetPath();
         }
 
         private void LockControls()
@@ -220,7 +223,7 @@ namespace MapleSeedU.ViewModels
         {
             (sender as DispatcherTimer)?.Stop();
 
-            pollingWorker.RunWorkerAsync();
+            PollingWorker.RunWorkerAsync();
 
             await Instance.ThemeUpdate();
         }
@@ -231,7 +234,8 @@ namespace MapleSeedU.ViewModels
 
             const string url = "https://wiiu.titlekeys.com/json";
 
-            using (var wc = new WebClient()) {
+            using (var wc = new WebClient())
+            {
                 wc.DownloadFile(new Uri(url), DbFile);
             }
         }
@@ -256,20 +260,23 @@ namespace MapleSeedU.ViewModels
             if (!Directory.Exists(tempPath = Path.Combine(Path.GetTempPath(), "MapleTree")))
                 Directory.CreateDirectory(tempPath);
 
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 var files = Directory.GetFiles(tempPath);
                 ProgressBarMax = files.Length;
 
                 var list = new TitleInfoEntry[ProgressBarMax = files.Length];
 
                 for (var i = 0; i < files.Length; i++)
-                    try {
+                    try
+                    {
                         var file = files[i];
                         list[i] = TitleInfoEntry.LoadCache(file, true);
                         list[i].IsCached = true;
                         ProgressBarCurrent++;
                     }
-                    catch (Exception e) {
+                    catch (Exception e)
+                    {
                         WriteLine(e.StackTrace);
                     }
 
@@ -289,11 +296,12 @@ namespace MapleSeedU.ViewModels
 
             var files = Directory.GetFiles(LibraryPath.GetPath(), "*.rpx", SearchOption.AllDirectories);
 
-            await Task.Run(() => {
-
+            await Task.Run(() =>
+            {
                 var list = new TitleInfoEntry[ProgressBarMax = files.Length];
 
-                for (var i = 0; i < files.Length; i++) {
+                for (var i = 0; i < files.Length; i++)
+                {
                     var file = files[i];
 
                     if (TitleInfoEntry.Entries == null) continue;
@@ -308,7 +316,8 @@ namespace MapleSeedU.ViewModels
 
                 ProgressBarCurrent = 0;
                 if (TitleInfoEntry.Entries == null) return;
-                foreach (var t in TitleInfoEntry.Entries) {
+                foreach (var t in TitleInfoEntry.Entries)
+                {
                     if (forceUpdate) t.CacheTheme(true);
                     ProgressBarCurrent++;
                 }
@@ -318,6 +327,29 @@ namespace MapleSeedU.ViewModels
             UnlockControls();
 
             Status = $"Library Path = {LibraryPath.GetPath()}";
+        }
+
+        private enum DpadButton
+        {
+            Up,
+            Down,
+            Left,
+            Right
+        }
+
+        private enum FaceButton
+        {
+            A,
+            B,
+            X,
+            Y,
+            Guide,
+            Start,
+            Back,
+            LeftStick,
+            RightStick,
+            LeftShoulder,
+            RightShoulder
         }
     }
 }

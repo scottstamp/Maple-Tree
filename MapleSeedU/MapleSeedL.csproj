@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6D7C0F83-5C98-492F-B683-32335BD45065}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>MapleSeedU</RootNamespace>
-    <AssemblyName>MapleSeedU</AssemblyName>
+    <RootNamespace>MapleSeedL</RootNamespace>
+    <AssemblyName>MapleSeedL</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -33,7 +33,7 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -45,7 +45,7 @@
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\bin\Release\</OutputPath>
@@ -58,7 +58,7 @@
     <ApplicationIcon>Seed.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>MapleSeedU.App</StartupObject>
+    <StartupObject>MapleSeedL.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="MahApps.Metro, Version=1.4.1.0, Culture=neutral, PublicKeyToken=f4fb5a3c4d1e5b4f, processorArchitecture=MSIL">
@@ -106,16 +106,16 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Helper.cs" />
+    <Compile Include="Models\Tools\Helper.cs" />
     <Compile Include="Models\Settings\CemuPath.cs" />
-    <Compile Include="Models\ConfigurationEntry.cs" />
+    <Compile Include="Models\Registry\ConfigurationEntry.cs" />
     <Compile Include="Models\Settings\LibraryPath.cs" />
-    <Compile Include="Models\ImageAnalysis.cs" />
-    <Compile Include="Models\RegistryKeyEntry.cs" />
-    <Compile Include="Models\ThemeManagerHelper.cs" />
+    <Compile Include="Models\Media\ImageAnalysis.cs" />
+    <Compile Include="Models\Registry\RegistryKeyEntry.cs" />
+    <Compile Include="Models\Media\ThemeManagerHelper.cs" />
     <Compile Include="Models\TitleInfoEntry.cs" />
     <Compile Include="Models\WiiUTitle.cs" />
-    <Compile Include="ReporterState.cs" />
+    <Compile Include="Models\XInput\ReporterState.cs" />
     <Compile Include="ThirdParty\Newtonsoft.Json\Bson\BsonBinaryType.cs" />
     <Compile Include="ThirdParty\Newtonsoft.Json\Bson\BsonBinaryWriter.cs" />
     <Compile Include="ThirdParty\Newtonsoft.Json\Bson\BsonObjectId.cs" />
@@ -385,8 +385,8 @@
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="XInputDotNetPure.dll" />
-    <Content Include="XInputInterface.dll">
+    <Content Include="Resources\XInputDotNetPure.dll" />
+    <Content Include="Resources\XInputInterface.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

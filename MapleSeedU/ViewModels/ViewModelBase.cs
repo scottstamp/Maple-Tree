@@ -13,7 +13,7 @@ using System.Windows.Input;
 
 #endregion
 
-namespace MapleSeedU.ViewModels
+namespace MapleSeedL.ViewModels
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

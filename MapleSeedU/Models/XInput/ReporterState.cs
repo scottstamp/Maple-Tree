@@ -5,7 +5,7 @@
 
 using XInputDotNetPure;
 
-namespace MapleSeedU
+namespace MapleSeedL.Models.XInput
 {
     public class ReporterState
     {

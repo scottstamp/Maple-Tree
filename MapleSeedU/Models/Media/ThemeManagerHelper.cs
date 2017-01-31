@@ -9,7 +9,7 @@ using System.Windows;
 using System.Windows.Media;
 using MahApps.Metro;
 
-namespace MapleSeedU.Models
+namespace MapleSeedL.Models
 {
     public static class ThemeManagerHelper
     {
