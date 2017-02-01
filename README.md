@@ -1,21 +1,12 @@
 # Maple-Tree
+The latest builds of MapleSeed and MapleSeed Lite can be found in their respective branches.
 
+# MapleSeed
 A small application with a feature set aimed to make Wii U title management easier.
 
-***Working Features***
-- Game Launching
-- Game Title Updating
-- Full Title Downloads (/dl titleid)
-- Upload/Download Graphic Packs
-- Upload/Download TransCache
-- Chat feature
-- Search by file name
-- Multi Selection title updates
-- Confirmation for file editing tasks
-- Multi Selection title updates
-- Download progress bar
-- /dl <titleID> command
-- Library Auto Updates
+* Latest Edge: https://github.com/Tsume/Maple-Tree/tree/mt-edge
+
+* Latest Stable: https://github.com/Tsume/Maple-Tree/tree/mt-stable
 
 
 # MapleSeed Lite
