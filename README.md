@@ -2,9 +2,6 @@
 
 A small application with a feature set aimed to make Wii U title management easier.
 
-
-***Maple Seed***
-
 ***Working Features***
 - Game Launching
 - Game Title Updating
@@ -20,15 +17,12 @@ A small application with a feature set aimed to make Wii U title management easi
 - /dl <titleID> command
 - Library Auto Updates
 
-***Work In Progress***
-- Add /help command
-- Add /repair command to fix broken titles
-- Add /search command to find title ids by game name
-- Add title checking to the Play! button
-- Add launching support for wud/wux files.
-- Typing while uploading
-- word cemu folder selection better.(people selecting main cemu folder)
-- Add & remove games from library
-- delete, rename, and transfer(to another user) uploaded files.
-- A sync repository like Dropbox / Google Drive shared folders.
-- Cheats section
+
+# MapleSeed Lite
+A lighter/trimmed down visually pleasing version of the original MapleSeed.
+
+Now with added controller support!!! (credit: scottstamp)
+
+* Latest Edge: https://github.com/Tsume/Maple-Tree/tree/lite-edge
+
+* Latest Stable: https://github.com/Tsume/Maple-Tree/tree/lite-stable
